@@ -1,28 +1,9 @@
-# Sistema simple "bancario" que permite las siguientes funcionalidades
-# La información no era persistente porque así era el requerimiento del test.
-# Se almacena en un diccionario
-# Se modifica para hacer la información persistente.
-# Almacena los usuarios, pass (no tiene algoritmo de seguridad), status y balance
-# en un archivo .csv y guarda backup cada vez que se sale del sistema y almacena la nueva información en 
-# el archivo datos.csv
-
-# Login         : Realiza control con clave
-#                 Si el usuario no existe permite darlo de alta. 
-#                 Verifica la clave por comparación
-#                 Inicia el usuario con un saldo de 2000
-#                 Administra múltiples usuarios
-#                 Bloquea al usuario después de tres intentos fallidos de la clave
-    
-# Depósitos     : Permite hacer depósitos
-# Retiros       : Permite realizar retiros. Valida que no se pueda retirar más que el saldo actual
-# Consulta      : Permite consultar el saldo de la cuenta del usuario
-# Tranferencias : Permite realizar transferencias entre cuentas a diferentes usuarios
-# Logout        : Permite cerrar la sesión del usuario
-# Quit          : Finaliza el programa, actualiza la información el .csv y backapea el último archivo
-
+from googletrans import Translator
 import os
 import csv
 from datetime import datetime
+import json
+
 
 def mensaje(mensaje) -> None:
     """ Muestra mensaje por pantalla con una pausa
@@ -31,9 +12,57 @@ def mensaje(mensaje) -> None:
     argument -str- string del mensaje
     Return: None
     """
-    print(mensaje)
+    print(traduceTexto(mensaje,idioma))
     input()
 
+def display_en_columnas(idiomas):
+    os.system('clear')
+    
+    elementos = list(idiomas.items())
+    elementos_en_columnas = [elementos[i:i+4] for i in range(0, len(elementos), 4)]
+
+    # Imprimir en cuatro columnas con tabulación
+    for fila in elementos_en_columnas:
+        for clave, valor in fila:
+            print(f"{clave.ljust(1)} - {str(valor)[:14].ljust(14)}", end="    ")
+        print()
+    print()
+
+def traduceTexto(texto, idioma_salida)->str:
+    """Cambia a idioma_salida elegido el texto
+    
+    Keyword arguments:
+    texto(str) : Texto a traducir
+    idioma_salida(str) : Idioma al que traducir
+    
+    Return: texto traducido al idioma_salida
+    """
+    global idioma
+        
+    translator = Translator()
+    traduccion = translator.translate(texto, src='es', dest=idioma_salida)
+    return traduccion.text
+
+def cambiaIdioma()->None:
+    """Cambia el idioma del sistema
+    
+    Keyword arguments:
+    idioma -- Elije de los idiomas disponibles en idiomas.json
+    Return: return_description
+    """
+    global idioma
+    
+    with open('idiomas.json', 'r') as archivo:
+        idiomas = json.load(archivo)
+    display_en_columnas(idiomas)
+    idiomaSalida = input(traduceTexto('Ingrese el idioma :',idioma))
+    try:
+        idiomas[idiomaSalida]
+        if idiomaSalida != "":
+            idioma = idiomaSalida
+    except:
+        return idioma
+    
 def grabaDatos(archivo)->bool:
     """Graba los datos de los usuarios en un archivo csv.
     Si el archivo existe le cambia el nombre con la hora y la fecha para back up
@@ -88,7 +117,7 @@ def cargaDatos(archivo) ->bool:
                     diccionario[usuario] = datos_usuario
                 return diccionario
             except:
-                mensaje('Hubo inconvenientes en la lectura de los datos. La información puede no estar actualizada')
+                mensaje('Hubo inconvenientes en la lectura de los datos. La información puede no estar actualizada',)
                 return {}
     else:
         return {}
@@ -104,11 +133,11 @@ def createUser(usuario)-> None:
     """
     while True:
         os.system('clear')
-        print(f"Usuario : {usuario}")
-        clave = input( 'Ingrese su clave   :')
-        claveControl = input('Reingrese su clave :')
+        print(f"{traduceTexto('Usuario',idioma)} : {usuario}")
+        clave = input(traduceTexto('Ingrese su clave   :',idioma))
+        claveControl = input(traduceTexto('Reingrese su clave :',idioma))
         if clave != claveControl:
-            mensaje("Las claves no coinciden. Reintente")
+            mensaje("Las claves no coinciden. Reintente",idioma)
         else:
             loginDatos[usuario.lower()] = {
                         'pass':clave,
@@ -131,7 +160,7 @@ def login() ->bool:
     
     while True:
         os.system('clear')
-        usuario  = input('Ingrese el usuario :')
+        usuario  = input(traduceTexto('Ingrese el usuario :',idioma))
         if usuario == '':
             break
         if usuario.lower() in loginDatos :
@@ -140,9 +169,9 @@ def login() ->bool:
                 exit()
             for i in range(3):
                 os.system('clear')
-                print('Ingrese el usuario :' + usuario)
+                print(traduceTexto('Ingrese el usuario :' + usuario,idioma))
     
-                clave = input('Ingrese la clave   :')
+                clave = input(traduceTexto('Ingrese la clave   :',idioma))
                 if clave == loginDatos[usuario]['pass']:
                     currentUser['user'] = usuario.lower()
                     return True
@@ -155,7 +184,7 @@ def login() ->bool:
 
             break
         else:
-            if input('Usuario inexistente. Desea darlo de alta (s/n)? ').lower() == 's':
+            if input(traduceTexto('Usuario inexistente. Desea darlo de alta (s/n)? ',idioma).lower()) == 's':
                 createUser(usuario)
                 return False
             
@@ -171,9 +200,9 @@ def deposits() ->None:
     
     while True:
         os.system('clear')
-        print('Depósitos')
+        print(traduceTexto('Depósitos',idioma))
         print('---------')
-        monto = input('Ingrese el monto a depositar : ')
+        monto = input(traduceTexto('Ingrese el monto a depositar : ',idioma))
         if monto == '':
             break
         try:
@@ -193,9 +222,9 @@ def widthdraws() ->None:
     """
     while True:
         os.system('clear')
-        print('Retiros')
+        print(traduceTexto('Retiros',idioma))
         print('-------')
-        monto = input('Ingrese el monto a retirar : ')
+        monto = input(traduceTexto('Ingrese el monto a retirar : ',idioma))
         if monto == '':
             break
         try:
@@ -215,10 +244,11 @@ def balance() ->None:
     Return : None
     """
     os.system('clear')
-    print('Balance')
+    print(traduceTexto('Balance',idioma))
     print('-------')
     print('')
-    mensaje(f"El monto de su cuenta es de : {loginDatos[currentUser['user']]['balance']}")
+    texto = traduceTexto('El monto de su cuenta es de :',idioma)
+    mensaje(f"{texto} {loginDatos[currentUser['user']]['balance']}")
     
 
 def transfer() -> None:
@@ -230,10 +260,10 @@ def transfer() -> None:
     """
     while True:
         os.system('clear')
-        print('Transferencias')
+        print(traduceTexto('Transferencias',idioma))
         print('--------------')
-        monto =   input('Ingrese el monto a transferir   : ')
-        destino = input('Ingrese el usuario destinatario : ')
+        monto =   input(traduceTexto('Ingrese el monto a transferir   : ',idioma))
+        destino = input(traduceTexto('Ingrese el usuario destinatario : '),idioma)
         if monto == '':
             break
         try:
@@ -271,6 +301,8 @@ def main() -> None:
 
     Return: 
     """
+    global idioma
+
     while True:
 
         opc_dict={
@@ -280,29 +312,31 @@ def main() -> None:
             "4":balance,
             "5":transfer,
             "6":logout,  
-            "7":customQuit    
+            "7":cambiaIdioma,
+            "8":customQuit    
             }
         
         os.system('clear')
-        
-        print(f"Sistema Bancario - Usuario {currentUser['user'].capitalize()}")
-        print( '----------------   -------')
+        titulo = traduceTexto('Sistema Bancario - Usuario',idioma)
+        print(f"{titulo} {currentUser['user'].capitalize()}")
+        print( '----------------  ','-------', '-' * len(currentUser['user']))
         print()
-        print('1- Loggin      ')
-        print('2- Deposits    ')
-        print('3- Widthdraws  ')
-        print('4- View Balance')
-        print('5- Transfer    ')
-        print('6- Logout      ')
-        print('7- Quit        ')
+        print(traduceTexto('1- Acceso         ',idioma))
+        print(traduceTexto('2- Depositos      ',idioma))
+        print(traduceTexto('3- Retiros        ',idioma))
+        print(traduceTexto('4- Ver balance    ',idioma))
+        print(traduceTexto('5- Transferencias ',idioma))
+        print(traduceTexto('6- Cerrar sesión  ',idioma))
+        print(traduceTexto('7- Cambia Idioma  ',idioma))
+        print(traduceTexto('8- Salir          ',idioma))
         
-        opcion = input('Ingrese la opción deseada :')
+        opcion = input(traduceTexto('Ingrese la opción deseada :',idioma))
         
         if opcion in opc_dict:
             if currentUser['user'] != '':
                 opc_dict[opcion]()
             else:
-                if opcion != '1' and opcion != '7':
+                if opcion != '1' and opcion != '8' and opcion!='7':
                     mensaje("Debe loguearse entes de realizar cualquier operación.")
                 else:    
                     opc_dict[opcion]()
@@ -315,5 +349,7 @@ loginDatos = cargaDatos('datos.csv')
 
 currentUser = {'user':''}
 
+# Idioma por default
+idioma = 'es'
 
 main()
