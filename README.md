@@ -13,12 +13,18 @@
                  Bloquea al usuario después de tres intentos fallidos de la clave
     
  Depósitos     : Permite hacer depósitos
+ 
  Retiros       : Permite realizar retiros. Valida que no se pueda retirar más que el saldo actual
+ 
  Consulta      : Permite consultar el saldo de la cuenta del usuario
+ 
  Tranferencias : Permite realizar transferencias entre cuentas a diferentes usuarios
+ 
  Logout        : Permite cerrar la sesión del usuario
+ 
  Cambio de 
  idioma        : Permite el cambio de idioma del sistema entre varios elejidos al azar
-
+ 
  Quit          : Finaliza el programa, actualiza la información el .csv y backapea el último archivo
+ 
 
