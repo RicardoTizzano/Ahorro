@@ -23,7 +23,7 @@
  Logout        : Permite cerrar la sesión del usuario
  
  Cambio de 
- idioma        : Permite el cambio de idioma del sistema entre varios elejidos al azar
+ idioma        : Permite el cambio de idioma del sistema entre varios elegidos al azar
  
  Quit          : Finaliza el programa, actualiza la información el .csv y backapea el último archivo
  
